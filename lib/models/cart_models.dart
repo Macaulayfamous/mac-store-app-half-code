@@ -1,9 +1,9 @@
 class CartModel {
   final String productName;
-  final double productPrice;
+  final int productPrice;
   final String categoryName;
   final List imageUrl;
-  final int quantity;
+   int quantity;
   final int instock;
   final String productId;
   final String productSize;

@@ -1,12 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mac_store_app/models/cart_models.dart';
 
+final cartProvider =
+    StateNotifierProvider<CartNotifier, Map<String, CartModel>>(
+  (ref) {
+    return CartNotifier();
+  },
+);
+
 class CartNotifier extends StateNotifier<Map<String, CartModel>> {
   CartNotifier() : super({});
 
   void addProductToCart({
     required String productName,
-    required double productPrice,
+    required int productPrice,
     required String categoryName,
     required List imageUrl,
     required int quantity,
@@ -50,4 +57,45 @@ class CartNotifier extends StateNotifier<Map<String, CartModel>> {
       };
     }
   }
+//function to remove  item from cart
+
+  void removeItem(String productId) {
+    state.remove(productId);
+    //notify listeners that the state has changed
+    state = {...state};
+  }
+
+  //function to increment cart item
+
+  void incrementItem(String productId) {
+    if (state.containsKey(productId)) {
+      state[productId]!.quantity++;
+    }
+
+    //notify listener that the  state has changed
+    state = {...state};
+  }
+
+  ///function to decrement
+
+  void decrementItem(String productId) {
+    if (state.containsKey(productId)) {
+      state[productId]!.quantity--;
+    }
+
+    //notify listeners that the state has changed
+
+    state = {...state};
+  }
+
+  double calculateTotalAmount() {
+    double totalAmount = 0.0;
+    state.forEach((productId, cartItem) {
+      totalAmount += cartItem.quantity * cartItem.discount;
+    });
+
+    return totalAmount;
+  }
+
+  Map<String, CartModel> get getCartItem => state;
 }

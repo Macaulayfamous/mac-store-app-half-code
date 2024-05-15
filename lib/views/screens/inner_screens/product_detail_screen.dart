@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mac_store_app/provider/cart_provider.dart';
+import 'package:mac_store_app/provider/favorite_provider.dart';
 
-class ProductDetailScreen extends StatelessWidget {
+class ProductDetailScreen extends ConsumerStatefulWidget {
   final dynamic productData;
 
   const ProductDetailScreen({super.key, required this.productData});
+
+  @override
+  _ProductDetailScreenState createState() => _ProductDetailScreenState();
+}
+
+class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
   @override
   Widget build(BuildContext context) {
+    final cartProviderData = ref.read(cartProvider.notifier);
+    final favoriteProviderData = ref.read(favoriteProvider.notifier);
+    ref.watch(favoriteProvider);
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -25,11 +37,30 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             ),
             IconButton(
-              onPressed: () {},
-              icon: const Icon(
-                Icons.favorite,
-                color: Colors.red,
-              ),
+              onPressed: () {
+                favoriteProviderData.addProductToFavorite(
+                  productName: widget.productData['productName'],
+                  productId: widget.productData['productId'],
+                  imageUrl: widget.productData['productImage'],
+                  productPrice: widget.productData['productPrice'],
+                );
+
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    margin: const EdgeInsets.all(15),
+                    behavior: SnackBarBehavior.floating,
+                    backgroundColor: Colors.grey,
+                    content: Text(widget.productData['productName'])));
+              },
+              icon: favoriteProviderData.getFavoriteItem
+                      .containsKey(widget.productData["productId"])
+                  ? const Icon(
+                      Icons.favorite,
+                      color: Colors.red,
+                    )
+                  : const Icon(
+                      Icons.favorite_border,
+                      color: Colors.red,
+                    ),
             ),
           ],
         ),
@@ -81,10 +112,11 @@ class ProductDetailScreen extends StatelessWidget {
                         height: 300,
                         child: PageView.builder(
                             scrollDirection: Axis.horizontal,
-                            itemCount: productData['productImage'].length,
+                            itemCount:
+                                widget.productData['productImage'].length,
                             itemBuilder: (context, index) {
                               return Image.network(
-                                productData['productImage'][index],
+                                widget.productData['productImage'][index],
                                 width: 198,
                                 height: 225,
                                 fit: BoxFit.cover,
@@ -103,7 +135,7 @@ class ProductDetailScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  productData['productName'],
+                  widget.productData['productName'],
                   style: GoogleFonts.roboto(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -114,7 +146,7 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  "\$${productData['productPrice'].toStringAsFixed(2)}",
+                  "\$${widget.productData['productPrice'].toStringAsFixed(2)}",
                   style: GoogleFonts.roboto(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -130,7 +162,7 @@ class ProductDetailScreen extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              productData['category'],
+              widget.productData['category'],
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -157,7 +189,7 @@ class ProductDetailScreen extends StatelessWidget {
                   child: ListView.builder(
                       shrinkWrap: true,
                       scrollDirection: Axis.horizontal,
-                      itemCount: productData['productSize'].length,
+                      itemCount: widget.productData['productSize'].length,
                       itemBuilder: (context, index) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
@@ -173,7 +205,7 @@ class ProductDetailScreen extends StatelessWidget {
                               child: Padding(
                                 padding: EdgeInsets.all(8),
                                 child: Text(
-                                  productData['productSize'][index],
+                                  widget.productData['productSize'][index],
                                   style: GoogleFonts.lato(
                                     color: Colors.white,
                                   ),
@@ -201,7 +233,7 @@ class ProductDetailScreen extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  productData['description'],
+                  widget.productData['description'],
                 ),
               ],
             ),
@@ -211,7 +243,25 @@ class ProductDetailScreen extends StatelessWidget {
       bottomSheet: Padding(
         padding: EdgeInsets.all(8),
         child: InkWell(
-          onTap: () {},
+          onTap: () {
+            cartProviderData.addProductToCart(
+                productName: widget.productData['productName'],
+                productPrice: widget.productData['productPrice'],
+                categoryName: widget.productData['category'],
+                imageUrl: widget.productData['productImage'],
+                quantity: 1,
+                instock: widget.productData['quantity'],
+                productId: widget.productData['productId'],
+                productSize: '',
+                discount: widget.productData['discount'],
+                description: widget.productData['description']);
+
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                margin: const EdgeInsets.all(15),
+                behavior: SnackBarBehavior.floating,
+                backgroundColor: Colors.grey,
+                content: Text(widget.productData['productName'])));
+          },
           child: Container(
             width: 386,
             height: 48,
@@ -230,7 +280,7 @@ class ProductDetailScreen extends StatelessWidget {
                 style: GoogleFonts.lato(
                   color: Colors.white,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,                                                                                                              
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
