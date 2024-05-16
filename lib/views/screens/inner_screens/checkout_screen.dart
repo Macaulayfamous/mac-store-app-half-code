@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mac_store_app/provider/cart_provider.dart';
+import 'package:mac_store_app/views/screens/inner_screens/shipping_address_screen.dart';
 import 'package:mac_store_app/views/screens/main_screen.dart';
 import 'package:uuid/uuid.dart';
 
@@ -39,7 +39,11 @@ class _checkoutScreenState extends ConsumerState<checkoutScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               InkWell(
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) {
+                    return  const ShippingAddressScreen();
+                  }));
+                },
                 child: SizedBox(
                   width: 335,
                   height: 74,
