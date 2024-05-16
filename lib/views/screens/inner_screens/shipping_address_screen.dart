@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -9,7 +11,12 @@ class ShippingAddressScreen extends StatefulWidget {
 }
 
 class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  late String state;
+  late String city;
+  late String locality;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -45,6 +52,9 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                   ),
                 ),
                 TextFormField(
+                  onChanged: (value) {
+                    state = value;
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'enter filed';
@@ -60,6 +70,9 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                   height: 30,
                 ),
                 TextFormField(
+                  onChanged: (value) {
+                    city = value;
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'enter filed';
@@ -75,6 +88,9 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
                   height: 30,
                 ),
                 TextFormField(
+                  onChanged: (value) {
+                    locality = value;
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
                       return 'enter filed';
@@ -94,9 +110,21 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(8.0),
         child: InkWell(
-          onTap: () {
+          onTap: () async {
             if (_formKey.currentState!.validate()) {
               //update the user locality, city, state , pinCode
+              _showDialog(context);
+              await _firestore
+                  .collection('buyers')
+                  .doc(_auth.currentUser!.uid)
+                  .update(
+                {'state': state, 'city': city, 'locality': locality},
+              ).whenComplete(() {
+                Navigator.of(context).pop();
+                setState(() {
+                  _formKey.currentState!.validate();
+                });
+              });
             } else {
               //we can show a snackbar
             }
@@ -124,5 +152,30 @@ class _ShippingAddressScreenState extends State<ShippingAddressScreen> {
         ),
       ),
     );
+  }
+
+  void _showDialog(BuildContext context) {
+    showDialog(
+        context: context,
+        barrierDismissible: false, //use must tab button
+        builder: (BuildContext context) {
+          return const AlertDialog(
+            title: Text('Updating Address'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircularProgressIndicator(),
+                SizedBox(
+                  height: 10,
+                ),
+                Text('Please Wait....')
+              ],
+            ),
+          );
+        });
+
+    Future.delayed(const Duration(seconds: 3), () {
+      Navigator.of(context).pop();
+    });
   }
 }
