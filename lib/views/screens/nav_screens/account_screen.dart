@@ -14,9 +14,7 @@ class AccountScreen extends StatelessWidget {
               return OrderScreen();
             }));
           },
-          child: const Text(
-            'My Orders',
-          ),
+          child: const Text('My Orders'),
         ),
       ),
     );

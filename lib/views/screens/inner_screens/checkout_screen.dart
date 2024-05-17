@@ -206,7 +206,7 @@ class _checkoutScreenState extends ConsumerState<checkoutScreen> {
                   ),
                 ),
               ),
-              SizedBox(
+            const  SizedBox(
                 height: 15,
               ),
               const Text(

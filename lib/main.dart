@@ -7,6 +7,7 @@ import 'package:get/get.dart';
 import 'package:mac_store_app/controllers/category_controller.dart';
 import 'package:mac_store_app/views/screens/main_screen.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Platform.isAndroid
