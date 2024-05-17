@@ -1,15 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class OrderScreen extends StatelessWidget {
-  const OrderScreen({super.key});
+  OrderScreen({super.key});
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _ordersStream = FirebaseFirestore.instance
+    final Stream<QuerySnapshot> ordersStream = FirebaseFirestore.instance
         .collection('orders')
         .where('buyerId', isEqualTo: FirebaseAuth.instance.currentUser!.uid)
         .snapshots();
@@ -79,7 +80,7 @@ class OrderScreen extends StatelessWidget {
         ),
       ),
       body: StreamBuilder<QuerySnapshot>(
-        stream: _ordersStream,
+        stream: ordersStream,
         builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasError) {
             return const Text('Something went wrong');
@@ -90,7 +91,17 @@ class OrderScreen extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           }
-
+          if (snapshot.data!.docs.isEmpty) {
+            return const Center(
+              child: Text(
+                'You have no Order',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            );
+          }
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,
             itemBuilder: (context, index) {
@@ -285,10 +296,18 @@ class OrderScreen extends StatelessWidget {
                                           Positioned(
                                               top: 0,
                                               left: 0,
-                                              child: Image.asset(
-                                                'assets/icons/delete.png',
-                                                width: 20,
-                                                height: 20,
+                                              child: InkWell(
+                                                onTap: () async {
+                                                  await _firestore
+                                                      .collection('orders')
+                                                      .doc(orderData['orderId'])
+                                                      .delete();
+                                                },
+                                                child: Image.asset(
+                                                  'assets/icons/delete.png',
+                                                  width: 20,
+                                                  height: 20,
+                                                ),
                                               ))
                                         ],
                                       ),
