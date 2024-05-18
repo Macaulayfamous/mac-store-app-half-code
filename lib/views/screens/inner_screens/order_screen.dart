@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:mac_store_app/views/screens/inner_screens/order_detail_screen.dart';
 
 class OrderScreen extends StatelessWidget {
   OrderScreen({super.key});
@@ -112,7 +113,12 @@ class OrderScreen extends StatelessWidget {
                   vertical: 25,
                 ),
                 child: InkWell(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return OrderDetailScreen(orderData: orderData,);
+                    }));
+                  },
                   child: Container(
                     width: 335,
                     height: 153,
