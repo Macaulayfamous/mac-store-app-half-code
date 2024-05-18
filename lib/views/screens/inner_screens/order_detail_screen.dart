@@ -199,7 +199,7 @@ class OrderDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Container(
               width: 336,
-              height: 154,
+              height: 195,
               clipBehavior: Clip.antiAlias,
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -253,8 +253,11 @@ class OrderDetailScreen extends StatelessWidget {
                     ),
                   ),
                   orderData['delivered'] == true
-                      ? ElevatedButton(
-                          onPressed: () {}, child: const Text('Review'))
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: ElevatedButton(
+                              onPressed: () {}, child: const Text('Review')),
+                        )
                       : const SizedBox()
                 ],
               ),
