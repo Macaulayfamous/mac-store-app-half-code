@@ -1,18 +1,40 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class OrderDetailScreen extends StatelessWidget {
+class OrderDetailScreen extends StatefulWidget {
   final dynamic orderData;
 
-  const OrderDetailScreen({super.key, required this.orderData});
+  OrderDetailScreen({super.key, required this.orderData});
+
+  @override
+  State<OrderDetailScreen> createState() => _OrderDetailScreenState();
+}
+
+class _OrderDetailScreenState extends State<OrderDetailScreen> {
+  final TextEditingController _reviewController = TextEditingController();
+  double rating = 0;
+
+  ///is to check if the current logged in user have gave a review or not
+  Future<bool> hasUserReviewedProduct(String productId) async {
+    final user = FirebaseAuth.instance.currentUser;
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('productReviews')
+        .where('productId', isEqualTo: productId)
+        .where('buyerId', isEqualTo: user!.uid)
+        .get();
+
+    return querySnapshot.docs.isNotEmpty;
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          orderData['productName'],
+          widget.orderData['productName'],
         ),
       ),
       body: Column(
@@ -73,7 +95,7 @@ class OrderDetailScreen extends StatelessWidget {
                                       left: 10,
                                       top: 5,
                                       child: Image.network(
-                                        orderData["productImage"],
+                                        widget.orderData["productImage"],
                                         width: 58,
                                         height: 67,
                                         fit: BoxFit.cover,
@@ -103,7 +125,7 @@ class OrderDetailScreen extends StatelessWidget {
                                             SizedBox(
                                               width: double.infinity,
                                               child: Text(
-                                                orderData['productName'],
+                                                widget.orderData['productName'],
                                                 style: GoogleFonts.getFont(
                                                   'Lato',
                                                   color: Colors.black,
@@ -118,7 +140,7 @@ class OrderDetailScreen extends StatelessWidget {
                                             Align(
                                               alignment: Alignment.centerLeft,
                                               child: Text(
-                                                orderData['category'],
+                                                widget.orderData['category'],
                                                 style: const TextStyle(
                                                   color: Color(
                                                     0xFF7F808C,
@@ -131,7 +153,7 @@ class OrderDetailScreen extends StatelessWidget {
                                               height: 2,
                                             ),
                                             Text(
-                                              "\$${orderData['price']}",
+                                              "\$${widget.orderData['price']}",
                                               style: const TextStyle(
                                                 color: Color(
                                                   0xFF0B0C1E,
@@ -155,9 +177,9 @@ class OrderDetailScreen extends StatelessWidget {
                                 height: 25,
                                 clipBehavior: Clip.antiAlias,
                                 decoration: BoxDecoration(
-                                  color: orderData['delivered'] == true
+                                  color: widget.orderData['delivered'] == true
                                       ? Color(0xFF3C55EF)
-                                      : orderData['processing'] == true
+                                      : widget.orderData['processing'] == true
                                           ? Colors.purple
                                           : Colors.red,
                                   borderRadius: BorderRadius.circular(4),
@@ -169,9 +191,10 @@ class OrderDetailScreen extends StatelessWidget {
                                       left: 9,
                                       top: 3,
                                       child: Text(
-                                        orderData['delivered'] == true
+                                        widget.orderData['delivered'] == true
                                             ? 'Delivered'
-                                            : orderData['processing'] == true
+                                            : widget.orderData['processing'] ==
+                                                    true
                                                 ? "Processing"
                                                 : "Cancelled",
                                         style: const TextStyle(
@@ -231,18 +254,20 @@ class OrderDetailScreen extends StatelessWidget {
                           height: 10,
                         ),
                         Text(
-                          orderData['locality'] + " " + orderData['state'],
+                          widget.orderData['locality'] +
+                              " " +
+                              widget.orderData['state'],
                           style: const TextStyle(
                             fontSize: 16,
                           ),
                         ),
                         Text(
-                          orderData['state'],
+                          widget.orderData['state'],
                           style:
                               const TextStyle(fontSize: 16, letterSpacing: 1),
                         ),
                         Text(
-                          "To ${orderData['fullName']}",
+                          "To ${widget.orderData['fullName']}",
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -252,11 +277,110 @@ class OrderDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  orderData['delivered'] == true
+                  widget.orderData['delivered'] == true
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: ElevatedButton(
-                              onPressed: () {}, child: const Text('Review')),
+                            onPressed: () async {
+                              final productId = widget.orderData['productId'];
+                              final hasReviewed =
+                                  await hasUserReviewedProduct(productId);
+                              if (hasReviewed) {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text('Error'),
+                                        content: const Text(
+                                            'You have already reviewed this product'),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text('Ok'),
+                                          )
+                                        ],
+                                      );
+                                    });
+                              } else {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: const Text('Leave a Review'),
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            TextFormField(
+                                              controller: _reviewController,
+                                              decoration: const InputDecoration(
+                                                labelText: 'Your review',
+                                              ),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: RatingBar.builder(
+                                                initialRating: rating,
+                                                direction: Axis.horizontal,
+                                                minRating: 1,
+                                                maxRating: 5,
+                                                allowHalfRating: true,
+                                                itemSize: 24,
+                                                unratedColor: Colors.grey,
+                                                itemCount: 5,
+                                                itemPadding:
+                                                    const EdgeInsets.symmetric(
+                                                        horizontal: 4),
+                                                itemBuilder: (context, _) {
+                                                  return const Icon(
+                                                    Icons.star,
+                                                    color: Colors.amber,
+                                                  );
+                                                },
+                                                onRatingUpdate: (value) {
+                                                  rating = value;
+                                                  print(rating);
+                                                },
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () async {
+                                              final review =
+                                                  _reviewController.text;
+                                              await FirebaseFirestore.instance
+                                                  .collection('productReviews')
+                                                  .add({
+                                                'productId': widget
+                                                    .orderData['productId'],
+                                                'fullName': widget
+                                                    .orderData['fullName'],
+                                                'email':
+                                                    widget.orderData['email'],
+                                                'buyerId': FirebaseAuth
+                                                    .instance.currentUser!.uid,
+                                                'rating': rating,
+                                                'review': review,
+                                                'timeStamp': Timestamp.now(),
+                                              }).whenComplete(() {
+                                                Navigator.of(context).pop();
+                                                _reviewController.clear();
+                                                rating = 0;
+                                              });
+                                            },
+                                            child: const Text('Submit'),
+                                          ),
+                                        ],
+                                      );
+                                    });
+                              }
+                            },
+                            child: const Text('Review'),
+                          ),
                         )
                       : const SizedBox()
                 ],
