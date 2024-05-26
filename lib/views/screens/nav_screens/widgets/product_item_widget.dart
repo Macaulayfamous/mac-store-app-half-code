@@ -13,7 +13,9 @@ class ProductItemWidget extends StatelessWidget {
     return InkWell(
       onTap: () {
         Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return ProductDetailScreen(productData:productData ,);
+          return ProductDetailScreen(
+            productData: productData,
+          );
         }));
       },
       child: Container(
@@ -184,7 +186,9 @@ class ProductItemWidget extends StatelessWidget {
               left: 23,
               top: 155,
               child: Text(
-                "4.5",
+                productData['rating'] == 0
+                    ? ""
+                    : productData['rating'].toString(),
                 style: GoogleFonts.lato(
                   color: const Color(
                     0xFF7F8E9D,
@@ -193,6 +197,17 @@ class ProductItemWidget extends StatelessWidget {
                 ),
               ),
             ),
+            productData['rating'] == 0
+                ? const SizedBox()
+                : const Positioned(
+                    left: 8,
+                    top: 158,
+                    child: Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                      size: 12,
+                    ),
+                  ),
             Positioned(
               left: 104,
               top: 15,

@@ -20,6 +20,8 @@ class HomeScreen extends StatelessWidget {
             ReuseableTextWidget(
                 title: 'Recommended For you', subtitle: 'View all'),
             RecommenedProductWidget(),
+            ReuseableTextWidget(
+                title: 'Popular Products', subtitle: 'View all'),
           ],
         ),
       ),

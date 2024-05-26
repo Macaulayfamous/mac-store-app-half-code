@@ -10,6 +10,7 @@ class ProductDetailScreen extends ConsumerStatefulWidget {
   const ProductDetailScreen({super.key, required this.productData});
 
   @override
+  // ignore: library_private_types_in_public_api
   _ProductDetailScreenState createState() => _ProductDetailScreenState();
 }
 
@@ -166,9 +167,39 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
+                color: Colors.grey,
               ),
             ),
           ),
+          widget.productData['rating'] == 0
+              ? const Text('')
+              : Padding(
+                  padding: const EdgeInsets.only(left: 8),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.star,
+                        color: Colors.amber,
+                      ),
+                      Text(
+                        widget.productData['rating'].toString(),
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      Text(
+                        "(${widget.productData['totalReviews']})",
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.w400,
+                          letterSpacing: 2,
+                        ),
+                      )
+                    ],
+                  ),
+                ),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Row(
@@ -241,7 +272,7 @@ class _ProductDetailScreenState extends ConsumerState<ProductDetailScreen> {
         ],
       ),
       bottomSheet: Padding(
-        padding: EdgeInsets.all(8),
+        padding:const EdgeInsets.all(8),
         child: InkWell(
           onTap: () {
             cartProviderData.addProductToCart(
